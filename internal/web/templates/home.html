@@ -1,0 +1,89 @@
+{{define "home"}}{{template "top" .}}
+<section class="intro">
+  <h1>Unverified customer reports</h1>
+  <p>This page shows anonymized reports from people who recently had trouble. A rise in reports can mean a broader issue. It is not confirmation of an outage.{{if .OfficialURL}} For verified incidents, check the <a href="{{.OfficialURL}}" rel="noopener noreferrer">official status page</a>.{{end}}</p>
+  <p class="volume">
+    <span class="badge badge-{{.LevelClass}}">{{.Level}}</span>
+    <span>{{.LastHour}} in the last hour, {{.LastDay}} in the last 24 hours.</span>
+  </p>
+</section>
+
+<nav class="service-nav" aria-label="Services">
+  <ul>
+    <li><a href="/" {{if eq .FilterSlug ""}}aria-current="page"{{end}}>All services</a></li>
+    {{range .Stats}}
+    <li>
+      <a href="/?service={{.Slug}}" {{if .Current}}aria-current="page"{{end}}>
+        {{.Name}}
+        <span class="count">{{.LastHour}} last hour</span>
+      </a>
+    </li>
+    {{end}}
+  </ul>
+</nav>
+
+<section class="chart-section" aria-labelledby="chart-heading">
+  <div class="section-head">
+    <h2 id="chart-heading">{{.FilterName}}</h2>
+    <p>Last 24 hours, {{.BucketMinutes}}-minute buckets, UTC.</p>
+  </div>
+  {{if .Empty}}<p class="empty">No customer reports in this window. That does not mean the service is operating normally.</p>{{end}}
+  <svg class="chart" viewBox="0 0 960 140" role="img" aria-labelledby="chart-heading">
+    <line class="axis" x1="0" y1="140" x2="960" y2="140"></line>
+    {{range .Bars}}
+    <rect class="bar bar-{{.Level}}" x="{{.X}}" y="{{.Y}}" width="{{.W}}" height="{{.H}}">
+      <title>{{.Label}}: {{.Count}} reports</title>
+    </rect>
+    {{end}}
+  </svg>
+  <p class="privacy">Each bar is one time bucket. Color repeats the badge thresholds for that bucket. The table lists every count.</p>
+  <div class="table-wrap">
+    <table>
+      <caption>Report counts by time for {{.FilterName}}. Times are UTC.</caption>
+      <thead>
+        <tr><th scope="col">Bucket start</th><th scope="col">Reports</th></tr>
+      </thead>
+      <tbody>
+        {{range .Rows}}
+        <tr><td>{{.Label}}</td><td>{{.Count}}</td></tr>
+        {{end}}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="report" aria-labelledby="report-heading">
+  <h2 id="report-heading">Report a problem</h2>
+  <p class="privacy">Your description and email are sent privately to the operator. Other visitors only see combined report counts.</p>
+  <form method="post" action="/report">
+    <input type="hidden" name="csrf" value="{{.CSRF}}">
+    <div class="hp" aria-hidden="true">
+      <label for="company">Company</label>
+      <input id="company" name="company" type="text" tabindex="-1" autocomplete="off">
+    </div>
+    <div class="fields">
+      <label for="service">Service</label>
+      <select id="service" name="service" required>
+        {{range .Services}}
+        <option value="{{.ID}}" {{if .Selected}}selected{{end}}>{{.Label}}</option>
+        {{end}}
+      </select>
+
+      <label for="category">What is happening</label>
+      <select id="category" name="category" required>
+        <option value="" selected>Choose one</option>
+        {{range .Categories}}
+        <option value="{{.ID}}">{{.Label}}</option>
+        {{end}}
+      </select>
+
+      <label for="description">What are you seeing <span class="optional">(optional)</span></label>
+      <textarea id="description" name="description" maxlength="2000" rows="5"></textarea>
+
+      <label for="email">Email <span class="optional">(optional, if support should reply)</span></label>
+      <input id="email" name="email" type="email" maxlength="254" autocomplete="email">
+    </div>
+    <button type="submit">Submit report</button>
+  </form>
+</section>
+{{template "bottom" .}}{{end}}

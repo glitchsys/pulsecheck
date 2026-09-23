@@ -1,0 +1,15 @@
+{{define "login"}}{{template "top" .}}
+<section class="result narrow">
+  <h1>Admin</h1>
+  <p>Private reports are visible only after you sign in.</p>
+  {{if .LoginError}}<p class="form-error" role="alert">{{.LoginError}}</p>{{end}}
+  <form method="post" action="/admin/login">
+    <input type="hidden" name="csrf" value="{{.CSRF}}">
+    <div class="fields">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+    </div>
+    <button type="submit">Sign in</button>
+  </form>
+</section>
+{{template "bottom" .}}{{end}}

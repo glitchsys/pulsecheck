@@ -1,0 +1,46 @@
+{{define "admin"}}{{template "top" .}}
+<section class="admin">
+  <div class="section-head">
+    <h1>Private reports</h1>
+    <p>Descriptions and email addresses stay on this page. The public chart only shows counts.</p>
+  </div>
+  {{if not .Reports}}
+  <p class="empty">No reports yet.</p>
+  {{else}}
+  <div class="table-wrap">
+    <table>
+      <caption>Newest reports</caption>
+      <thead>
+        <tr>
+          <th scope="col">Time (UTC)</th>
+          <th scope="col">Service</th>
+          <th scope="col">Type</th>
+          <th scope="col">Email</th>
+          <th scope="col">Mail</th>
+          <th scope="col">Description</th>
+          <th scope="col">Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{range .Reports}}
+        <tr>
+          <td>{{.When}}</td>
+          <td>{{.Component}}</td>
+          <td>{{.Category}}</td>
+          <td>{{.Email}}</td>
+          <td>{{.EmailStatus}}</td>
+          <td class="desc">{{.Description}}</td>
+          <td>
+            <form method="post" action="/admin/reports/{{.ID}}/delete">
+              <input type="hidden" name="csrf" value="{{$.CSRF}}">
+              <button type="submit" class="danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </div>
+  {{end}}
+</section>
+{{template "bottom" .}}{{end}}

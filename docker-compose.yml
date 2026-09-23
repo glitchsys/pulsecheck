@@ -1,0 +1,41 @@
+services:
+  pulsecheck:
+    build: .
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      PORT: "8080"
+      SQLITE_PATH: /data/pulsecheck.db
+    volumes:
+      - pulsecheck-data:/data
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+        required: false
+
+  # Local MySQL only. Start with: docker compose --profile mysql up --build
+  # Point .env at it with DB_DRIVER=mysql and
+  # DATABASE_URL=pulsecheck:pulsecheck@tcp(mysql:3306)/pulsecheck?parseTime=true&charset=utf8mb4
+  mysql:
+    profiles: ["mysql"]
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: pulsecheck
+      MYSQL_USER: pulsecheck
+      MYSQL_PASSWORD: pulsecheck
+      MYSQL_ROOT_PASSWORD: pulsecheck-root
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-ppulsecheck-root"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    volumes:
+      - pulsecheck-mysql:/var/lib/mysql
+
+volumes:
+  pulsecheck-data:
+  pulsecheck-mysql:
