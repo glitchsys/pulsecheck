@@ -1,0 +1,6 @@
+.git
+data
+docs
+.env
+*.md
+pulsecheck
